@@ -1,13 +1,13 @@
 # config.py
 
-BASE_URL = "https://www.theknot.com/marketplace/wedding-reception-venues-atlanta-ga"
+BASE_URL = "https://preplaced.in/explore-mentors?userCategory=Working+Professional"
 CSS_SELECTOR = "[class^='info-container']"
 REQUIRED_KEYS = [
     "name",
     "price",
     "location",
-    "capacity",
-    "rating",
-    "reviews",
+    "experience",
+    "skills",
+    "domain",
     "description",
 ]

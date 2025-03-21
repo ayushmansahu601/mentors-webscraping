@@ -10,8 +10,8 @@ from crawl4ai import (
     LLMExtractionStrategy,
 )
 
-from models.venue import Venue
-from utils.data_utils import is_complete_venue, is_duplicate_venue
+from models.mentor import mentor
+from utils.data_utils import is_complete_mentor, is_duplicate_mentor
 
 
 def get_browser_config() -> BrowserConfig:
@@ -40,11 +40,11 @@ def get_llm_strategy() -> LLMExtractionStrategy:
     return LLMExtractionStrategy(
         provider="groq/deepseek-r1-distill-llama-70b",  # Name of the LLM provider
         api_token=os.getenv("GROQ_API_KEY"),  # API token for authentication
-        schema=Venue.model_json_schema(),  # JSON schema of the data model
+        schema=mentor.model_json_schema(),  # JSON schema of the data model
         extraction_type="schema",  # Type of extraction to perform
         instruction=(
-            "Extract all venue objects with 'name', 'location', 'price', 'capacity', "
-            "'rating', 'reviews', and a 1 sentence description of the venue from the "
+            "Extract all mentor objects with 'name', 'location', 'price', 'experience', "
+            "'skills', 'domain', and a 1 sentence description of the mentor from the "
             "following content."
         ),  # Instructions for the LLM
         input_format="markdown",  # Format of the input content
@@ -99,7 +99,7 @@ async def fetch_and_process_page(
     seen_names: Set[str],
 ) -> Tuple[List[dict], bool]:
     """
-    Fetches and processes a single page of venue data.
+    Fetches and processes page of mentor data.
 
     Args:
         crawler (AsyncWebCrawler): The web crawler instance.
@@ -108,12 +108,12 @@ async def fetch_and_process_page(
         css_selector (str): The CSS selector to target the content.
         llm_strategy (LLMExtractionStrategy): The LLM extraction strategy.
         session_id (str): The session identifier.
-        required_keys (List[str]): List of required keys in the venue data.
-        seen_names (Set[str]): Set of venue names that have already been seen.
+        required_keys (List[str]): List of required keys in the mentor data.
+        seen_names (Set[str]): Set of mentor names that have already been seen.
 
     Returns:
         Tuple[List[dict], bool]:
-            - List[dict]: A list of processed venues from the page.
+            - List[dict]: A list of processed mentors from the page.
             - bool: A flag indicating if the "No Results Found" message was encountered.
     """
     url = f"{base_url}?page={page_number}"
@@ -142,36 +142,36 @@ async def fetch_and_process_page(
     # Parse extracted content
     extracted_data = json.loads(result.extracted_content)
     if not extracted_data:
-        print(f"No venues found on page {page_number}.")
+        print(f"No mentors found on page {page_number}.")
         return [], False
 
     # After parsing extracted content
     print("Extracted data:", extracted_data)
 
-    # Process venues
-    complete_venues = []
-    for venue in extracted_data:
-        # Debugging: Print each venue to understand its structure
-        print("Processing venue:", venue)
+    # Process mentors
+    complete_mentors = []
+    for mentor in extracted_data:
+        # Debugging: Print each mentor to understand its structure
+        print("Processing mentor:", mentor)
 
         # Ignore the 'error' key if it's False
-        if venue.get("error") is False:
-            venue.pop("error", None)  # Remove the 'error' key if it's False
+        if mentor.get("error") is False:
+            mentor.pop("error", None)  # Remove the 'error' key if it's False
 
-        if not is_complete_venue(venue, required_keys):
-            continue  # Skip incomplete venues
+        if not is_complete_mentor(mentor, required_keys):
+            continue  # Skip incomplete mentors
 
-        if is_duplicate_venue(venue["name"], seen_names):
-            print(f"Duplicate venue '{venue['name']}' found. Skipping.")
-            continue  # Skip duplicate venues
+        if is_duplicate_mentor(mentor["name"], seen_names):
+            print(f"Duplicate mentor '{mentor['name']}' found. Skipping.")
+            continue  # Skip duplicate mentors
 
-        # Add venue to the list
-        seen_names.add(venue["name"])
-        complete_venues.append(venue)
+        # Add mentor to the list
+        seen_names.add(mentor["name"])
+        complete_mentors.append(mentor)
 
-    if not complete_venues:
-        print(f"No complete venues found on page {page_number}.")
+    if not complete_mentors:
+        print(f"No complete mentors found on page {page_number}.")
         return [], False
 
-    print(f"Extracted {len(complete_venues)} venues from page {page_number}.")
-    return complete_venues, False  # Continue crawling
+    print(f"Extracted {len(complete_mentors)} mentors from page {page_number}.")
+    return complete_mentors, False  # Continue crawling
